@@ -77,3 +77,7 @@ depcomp
 
 # tracing stuff
 log.txt
+
+# oxidize
+rust-src/target/
+Cargo.lock

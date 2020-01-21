@@ -3,7 +3,9 @@ bitwise_SOURCES= src/main.c src/misc.c \
 				 src/interactive.c src/cmd.c \
 				 src/stack.c src/shunting-yard.c \
 				 src/help.c inc/bitwise.h inc/stack.h \
-				 inc/shunting-yard.h
+				 inc/shunting-yard.h \
+				 rust-src/target/debug/libbitwise.a
+bitwise_LDADD=-L rust-src/target/debug -lbitwise
 
 dist_man_MANS=bitwise.1
 
@@ -32,3 +34,6 @@ TESTS = $(check_PROGRAMS)
 
 clean-local:
 		rm -f *.gcno
+
+rust-src/target/debug/:
+	cd rust-src && cargo build

@@ -43,49 +43,6 @@ char *color_cyan = NOTHING;
 char *color_white = NOTHING;
 char *color_reset = NOTHING;
 
-void init_colors(void)
-{
-	if (g_has_color) {
-		color_green = GREEN;
-		color_red = RED;
-		color_blue = BLUE;
-		color_magenta = MAGENTA;
-		color_cyan = CYAN;
-		color_white = WHITE;
-		color_reset = RESET;
-	} else {
-		color_green = NOTHING;
-		color_red = NOTHING;
-		color_blue = NOTHING;
-		color_magenta = NOTHING;
-		color_cyan = NOTHING;
-		color_white = NOTHING;
-		color_reset = NOTHING;
-	}
-}
-
-void init_terminal(void)
-{
-	initscr();
-	if (has_colors() == FALSE)
-		g_has_color = 0;
-	else {
-		start_color();
-		init_colors();
-	}
-	cbreak();
-	noecho();
-	nonl();
-	intrflush(NULL, FALSE);
-	keypad(stdscr, TRUE);
-	curs_set(2);
-}
-
-void deinit_terminal(void)
-{
-	endwin();
-}
-
 void die(const char *fmt, ...)
 {
 	va_list args;
@@ -97,62 +54,6 @@ void die(const char *fmt, ...)
 	vfprintf(stderr, fmt, args);
 	va_end(args);
 	exit(EXIT_FAILURE);
-}
-
-int validate_input(int ch, int base)
-{
-	switch (base) {
-	case 2:
-		if (ch == '0' || ch == '1')
-			return 0;
-		break;
-	case 8:
-		if (ch >= '0' && ch <= '7')
-			return 0;
-		break;
-	case 16:
-		if ((ch >= '0' && ch <= '9') ||
-		    (ch >= 'A' && ch <= 'F') ||
-		    (ch >= 'a' && ch <= 'f'))
-			return 0;
-		break;
-	case 10:
-		if (isdigit(ch))
-			return 0;
-		break;
-	default:
-		break;
-	}
-
-	return 1;
-}
-
-int binary_scanf(const char *buf, uint64_t *val)
-{
-	uint64_t value = 0;
-
-	/* Skip the leading b */
-	buf++;
-
-	while (*buf) {
-		switch (*buf) {
-
-		case '0':
-			value <<= 1;
-			break;
-		case '1':
-			value <<= 1;
-			value++;
-			break;
-		default:
-			return 0;
-		}
-		buf++;
-	}
-
-	*val = value;
-
-	return 1;
 }
 
 int base_scanf(const char *buf, int base, uint64_t *value)
@@ -183,23 +84,6 @@ int base_scanf(const char *buf, int base, uint64_t *value)
 	}
 
 	return 0;
-}
-
-int parse_input(const char *input, uint64_t *val)
-{
-	int base;
-
-	if (tolower(input[0]) == 'b')
-		base = 2;
-	else if (input[0] == '0')
-		if (input[1] == 'x' || input[1] == 'X')
-			base = 16;
-		else
-			base = 8;
-	else
-		base = 10;
-
-	return base_scanf(input, base, val);
 }
 
 int lltostr(uint64_t val, char *buf, int base)
@@ -304,34 +188,4 @@ int sprintf_size(uint64_t val, char *buf, bool si)
 	}
 
 	return ret;
-}
-
-void set_width_by_val(uint64_t val)
-{
-	if (val & 0xFFFFFFFF00000000)
-		g_width = 64;
-	else if (val & 0xFFFF0000)
-		g_width = 32;
-	else if (val & 0xFF00)
-		g_width = 16;
-	else if (val & 0xFF)
-		g_width = 8;
-	else
-		g_width = 32;
-}
-
-int set_width(char width)
-{
-	if (tolower(width) == 'b')
-		g_width = 8;
-	else if (tolower(width) == 'w')
-		g_width = 16;
-	else if (tolower(width) == 'l')
-		g_width = 32;
-	else if (tolower(width) == 'd')
-		g_width = 64;
-	else
-		return 1;
-
-	return 0;
 }
